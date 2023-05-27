@@ -13,6 +13,12 @@
 
 #include "../streaming/stream.h"
 #include "nlohmann/json.hpp"
+#include <prometheus/counter.h>
+#include <prometheus/histogram.h>
+#include <prometheus/exposer.h>
+#include <prometheus/registry.h>
+#include "prometheus/family.h"
+#include "prometheus/gauge.h"
 
 class IOMonitor : public Source<std::string> {
  public:
@@ -54,36 +60,32 @@ class IOLogProcessor : public Node<std::string, std::string> {
   std::string buffer_;
 };
 
-class DataPrinter : public Sink<std::string> {
+class PrometheusDataSink : public Sink<std::string> {
  public:
-  DataPrinter(int port=8080): Sink(), port_(port) {
-    // check server is up
-    sleep(3); // wait for the server to start
-    int sock = socket(AF_INET, SOCK_STREAM, 0);
-    struct sockaddr_in serv_addr;
-    memset(&serv_addr, 0, sizeof(serv_addr));
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
-    serv_addr.sin_port = htons(uint16_t(port_));
-    if (connect(sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) == -1) {
-      perror("connect to server error\n");
-      exit(1);
-    }
-    output_fd_ = sock;
-    std::cout << "connect to server successfully\n"
-      << "fd: " << output_fd_ << std::endl;
+  PrometheusDataSink(int port=8080): Sink() {
+    exposer_.reset(new prometheus::Exposer("10.1.3.26:8080"));
+    registry_ = std::make_shared<prometheus::Registry>();
+    // prometheus::Registry reg;
+    auto& builder = prometheus::BuildGauge().Name("sink_data").Help("")
+      .Register(*registry_);
+    auto& temp = builder.Add({});
+    gauge_.reset(&temp);
+    exposer_->RegisterCollectable(registry_);
   }
   virtual void ComputeImpl() override {
     auto data = Recv();
     for (auto& c : data) {
-      write(output_fd_, c.c_str(), data.size());
+      std::cout << c << std::endl;
+      // gauge_->Set(c.size());
+      const auto random_value = std::rand() % 100;
+      gauge_->Set(c.size() * random_value);
     }
   }
-  ~DataPrinter() {
+  ~PrometheusDataSink() {
     // kill(child_, SIGKILL);
   }
  private:
-  pid_t child_;
-  int port_;
-  int output_fd_;
+  std::shared_ptr<prometheus::Exposer> exposer_;
+  std::shared_ptr<prometheus::Registry> registry_;
+  std::shared_ptr<prometheus::Gauge> gauge_;
 };
