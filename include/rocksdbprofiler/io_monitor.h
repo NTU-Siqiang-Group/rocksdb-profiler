@@ -65,3 +65,10 @@ class IOLogProcessor : public Node<std::string, std::shared_ptr<Metric> > {
  private:
   std::string buffer_;
 };
+
+static std::shared_ptr<IOMonitor> GetDefaultIOMonitor() {
+  auto ret = std::make_shared<IOMonitor>();
+  auto io_log_processor = std::make_shared<IOLogProcessor>();
+  ret->Next(io_log_processor.get());
+  return ret;
+}

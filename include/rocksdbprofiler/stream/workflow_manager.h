@@ -4,16 +4,17 @@
 #include <vector>
 #include <thread>
 #include <atomic>
+#include <functional>
 
 class WorkFlowManager {
  public:
   WorkFlowManager(): stop_(false) {}
   void Start() {
-    workers.push_back(std::thread([this]() {
-      for (auto& src : srcs_) {
+    for (auto src : srcs_) {
+      workers.push_back(std::thread([this, src]() {
         startWorkflow(src);
-      }
-    }));
+      }));
+    }
   }
   void Register(Computable* src) {
     srcs_.push_back(src);
@@ -22,6 +23,7 @@ class WorkFlowManager {
     stop_.store(true);
   }
   ~WorkFlowManager() {
+    stop_.store(true);
     for (auto& w : workers) {
       w.join();
     }
