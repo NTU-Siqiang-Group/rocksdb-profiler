@@ -1,6 +1,6 @@
-#include "rocksdbprofiler/io_monitor.h"
-#include "rocksdbprofiler/sink.h"
-#include "rocksdbprofiler/stream/workflow_manager.h"
+#include "include/rocksdbprofiler/io_monitor.h"
+#include "include/rocksdbprofiler/sink.h"
+#include "include/rocksdbprofiler/stream/workflow_manager.h"
 
 #include <memory>
 #include <thread>
@@ -24,18 +24,19 @@ int main() {
   // t.detach();
   auto io_monitor = std::shared_ptr<IOMonitor>(new IOMonitor());
   auto io_log_processor = std::shared_ptr<IOLogProcessor>(new IOLogProcessor());
-  auto data_printer = std::shared_ptr<PrometheusDataSink>(new PrometheusDataSink());
+  auto sinker = std::shared_ptr<PrometheusDataSink>(GetDefaultPrometheusDataSink());
   io_monitor->Next(
     io_log_processor->Next(
-      data_printer.get()
+      sinker.get()
     )
   );
-  data_printer->RegisterMetric(ReadIOMetric().GetLabel());
-  data_printer->RegisterMetric(WriteIOMetric().GetLabel());
+  // sinker->RegisterMetric(ReadIOMetric().GetLabel());
+  // sinker->RegisterMetric(WriteIOMetric().GetLabel());
+  // sinker->RegisterMetric(RocksDBCompactionCompleteMetric(0).GetLabel());
   WorkFlowManager manager;
   manager.Register(io_monitor.get());
   manager.Start();
-  sleep(10);
+  sleep(20);
   manager.Stop();
   return 0;
 }
