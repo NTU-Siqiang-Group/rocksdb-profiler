@@ -1,5 +1,7 @@
-#include "monitor/io_monitor.h"
-#include "streaming/workflow_manager.h"
+#include "rocksdbprofiler/io_monitor.h"
+#include "rocksdbprofiler/sink.h"
+#include "rocksdbprofiler/stream/workflow_manager.h"
+
 #include <memory>
 #include <thread>
 #include <fcntl.h>
@@ -28,7 +30,12 @@ int main() {
       data_printer.get()
     )
   );
-  WorkFlowManager<std::string> manager(io_monitor.get());
+  data_printer->RegisterMetric(ReadIOMetric().GetLabel());
+  data_printer->RegisterMetric(WriteIOMetric().GetLabel());
+  WorkFlowManager manager;
+  manager.Register(io_monitor.get());
   manager.Start();
+  sleep(10);
+  manager.Stop();
   return 0;
 }

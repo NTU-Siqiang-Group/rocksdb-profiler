@@ -80,6 +80,6 @@ void IOLogProcessor::ComputeImpl() {
   // }
   Recv();
   sleep(1);
-  IOStat stat{.timestamp = "12:00:01", .read_speed = "12.01", .write_speed = "00.0"};
-  Emit(stat.ToString());
+  Emit(std::make_shared<ReadIOMetric>(ReadIOMetric(1.0 * (rand() % 100))));
+  Emit(std::make_shared<WriteIOMetric>(WriteIOMetric(2.0 * (rand() % 200))));
 }

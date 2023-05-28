@@ -3,6 +3,7 @@
 #include <queue>
 #include <iostream>
 #include <mutex>
+#include <string>
 
 template<typename T>
 class Channel {
@@ -13,7 +14,7 @@ class Channel {
     return true;
   }
  public:
-  std::queue<T>* data;
+  std::shared_ptr<std::queue<T> > data;
 };
 
 // not thread-safe
@@ -26,23 +27,20 @@ class OutputChannel : public Channel<T> {
     }
   }
   T get() {}
-  virtual void RegisterNext(Channel<T>* nxt) {
+  virtual void RegisterNext(std::shared_ptr<Channel<T> > nxt) {
     if (nxt == nullptr || nxt->data == nullptr) {
       return;
     }
     output_buffers.push_back(nxt->data);
   }
   // output buffers
-  std::vector<std::queue<T>*> output_buffers;
+  std::vector<std::shared_ptr<std::queue<T> > > output_buffers;
 };
 template<typename T>
 class InputChannel : public Channel<T> {
  public:
   InputChannel() {
-    this->data = new std::queue<T>();
-  }
-  ~InputChannel() {
-    delete this->data;
+    this->data.reset(new std::queue<T>());
   }
   void submit(const T& t) {};
   T get() override {
@@ -58,22 +56,15 @@ class InputChannel : public Channel<T> {
 class Computable {
  public:
   virtual void Compute() = 0;
+  virtual void Start() {}
 };
 
 template<typename T, typename C>
 class Node : public Computable {
  public:
   Node()  {
-    input_ = new InputChannel<T>();
-    output_ = new OutputChannel<C>();
-  }
-  ~Node() {
-    if (input_ != nullptr) {
-      delete input_;
-    }
-    if (output_ != nullptr) {
-      delete output_;
-    }
+    input_.reset(new InputChannel<T>());
+    output_.reset(new OutputChannel<C>());
   }
   // construct computation graph
   template<typename F>
@@ -86,7 +77,7 @@ class Node : public Computable {
   std::vector<T> Recv() {
     assert(input_ != nullptr);
     if (input_->is_empty()) {
-      return {};
+      return std::vector<T>();
     }
     std::vector<T> ret;
     while (!input_->is_empty()) {
@@ -107,27 +98,20 @@ class Node : public Computable {
   }
   virtual void ComputeImpl() = 0;
   Computable* next_;
-  InputChannel<T>* input_;
-  OutputChannel<C>* output_;
+  std::shared_ptr<InputChannel<T> > input_;
+  std::shared_ptr<OutputChannel<C> > output_;
 };
 
 template <typename T>
 class Source : public Node<T, T> {
  public:
-  Source(): Node<T, T>() {
-    delete this->input_;
-    this->input_ = nullptr;
-  }
-  virtual void Start() = 0;
+  Source(): Node<T, T>() {}
 };
 
 template<typename T>
 class Sink : public Node<T, T> {
  public:
-  Sink(): Node<T, T>() {
-    delete this->output_;
-    this->output_ = nullptr;
-  }
+  Sink(): Node<T, T>() {}
   Node<T, T>* Next(Node<T, T>* nxt) = delete;
   void Emit(const T& t) = delete;
 };
