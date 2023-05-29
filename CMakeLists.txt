@@ -22,5 +22,25 @@ install(
 )
 install(
   TARGETS rocksprofiler
+  EXPORT rocksprofiler
   LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+)
+
+install(
+  EXPORT rocksprofiler
+  FILE rocksprofiler.cmake
+  NAMESPACE rocksprofiler::
+  DESTINATION lib/cmake/rocksprofiler)
+
+include(CMakePackageConfigHelpers)
+
+configure_package_config_file(
+  cmake/rocksprofilerConfig.cmake.in ${PROJECT_BINARY_DIR}/cmake/rocksprofilerConfig.cmake
+  INSTALL_DESTINATION lib/cmake/rocksprofiler
+)
+
+install(
+  FILES
+  "${PROJECT_BINARY_DIR}/cmake/rocksprofilerConfig.cmake"
+  DESTINATION lib/cmake/rocksprofiler
 )
