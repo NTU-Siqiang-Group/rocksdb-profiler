@@ -90,7 +90,7 @@ class StatsListener : public rocksdb::EventListener, public Source<std::shared_p
   std::mutex mtx_;
 };
 
-class RocksDBStats : public rocksdb::Statistics, public Source<std::shared_ptr<RocksDBOpStat>> {
+class RocksDBStats : public rocksdb::Statistics, public Source<std::shared_ptr<Metric>> {
  public:
   RocksDBStats() {
     stats_ = rocksdb::CreateDBStatistics();
@@ -158,8 +158,16 @@ class RocksDBStats : public rocksdb::Statistics, public Source<std::shared_ptr<R
       return;
     }
     cur_ = now;
-    Emit(std::make_shared<RocksDBReadStat>(get_buffer_ / get_time_));
-    Emit(std::make_shared<RocksDBWriteStat>(write_buffer_ / write_time_));
+    if (get_time_ > 0) {
+      Emit(std::make_shared<RocksDBReadStat>(get_buffer_ / get_time_));
+    } else {
+      Emit(std::make_shared<RocksDBReadStat>(0));
+    }
+    if (write_time_ > 0) {
+      Emit(std::make_shared<RocksDBWriteStat>(write_buffer_ / write_time_));
+    } else {
+      Emit(std::make_shared<RocksDBWriteStat>(0));
+    }
     get_buffer_ = 0;
     write_buffer_ = 0;
     get_time_ = 0;

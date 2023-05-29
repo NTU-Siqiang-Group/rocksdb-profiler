@@ -11,6 +11,7 @@ class PrometheusDataSinkImpl : public PrometheusDataSink {
   virtual void ComputeImpl() override;
   void RegisterMetric(const std::string& label, const std::string& kind="gauge") override;
  private:
+  std::mutex mtx_;
   std::shared_ptr<prometheus::Exposer> exposer_;
   std::shared_ptr<prometheus::Registry> registry_;
   std::unordered_map<std::string, prometheus::Gauge*> gauges_;
@@ -24,11 +25,12 @@ PrometheusDataSinkImpl::PrometheusDataSinkImpl(int port) {
 }
 
 void PrometheusDataSinkImpl::ComputeImpl() {
+  std::lock_guard<std::mutex> lock(mtx_);
   auto data = Recv();
   for (auto& c : data) {
     auto label = c->GetLabel();
     auto value = c->GetValue();
-    std::cout << label << " " << value << std::endl;
+    // std::cout << label << " " << value << std::endl;
     if (gauges_.find(label) != gauges_.end()) {
       gauges_[label]->Set(value);
     } else if (counters_.find(label) != counters_.end()) {
