@@ -19,7 +19,7 @@ class PrometheusDataSinkImpl : public PrometheusDataSink {
 };
 
 PrometheusDataSinkImpl::PrometheusDataSinkImpl(int port) {
-  exposer_.reset(new prometheus::Exposer("10.1.3.26:8080"));
+  exposer_.reset(new prometheus::Exposer("127.0.0.1:8080"));
   registry_ = std::make_shared<prometheus::Registry>();
   exposer_->RegisterCollectable(registry_);
 }
@@ -30,7 +30,6 @@ void PrometheusDataSinkImpl::ComputeImpl() {
   for (auto& c : data) {
     auto label = c->GetLabel();
     auto value = c->GetValue();
-    // std::cout << label << " " << value << std::endl;
     if (gauges_.find(label) != gauges_.end()) {
       gauges_[label]->Set(value);
     } else if (counters_.find(label) != counters_.end()) {

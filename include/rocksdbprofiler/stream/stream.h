@@ -4,6 +4,8 @@
 #include <iostream>
 #include <mutex>
 #include <string>
+#include <memory>
+#include <cassert>
 
 template<typename T>
 class Channel {
@@ -65,6 +67,7 @@ class Node : public Computable {
   Node()  {
     input_.reset(new InputChannel<T>());
     output_.reset(new OutputChannel<C>());
+    next_ = nullptr;
   }
   // construct computation graph
   template<typename F>
