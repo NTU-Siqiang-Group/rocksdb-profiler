@@ -1,6 +1,6 @@
-#include "include/rocksdbprofiler/io_monitor.h"
-#include "include/rocksdbprofiler/sink.h"
-#include "include/rocksdbprofiler/stream/workflow_manager.h"
+#include "rocksdbprofiler/io_monitor.h"
+#include "rocksdbprofiler/sink.h"
+#include "rocksdbprofiler/stream/workflow_manager.h"
 
 #include <memory>
 #include <thread>

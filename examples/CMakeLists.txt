@@ -1,0 +1,11 @@
+find_path(ROCKSDB_INCLUDE_DIR rocksdb/db.h PATHS)
+include_directories(${ROCKSDB_INCLUDE_DIR})
+
+find_library(ROCKSDB_LIB rocksdb)
+
+file(GLOB SRC *.cc)
+foreach (file ${SRC})
+  get_filename_component(exename ${file} NAME_WE)
+  add_executable(${exename} ${file})
+  target_link_libraries(${exename} ${ROCKSDB_LIB} rocksprofiler prometheus-cpp::pull)
+endforeach ()
