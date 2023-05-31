@@ -19,7 +19,7 @@ simply use `find_package` in your `CMakeLists.txt`, then link with your executab
 ```
 find_package(rocksprofiler REQUIRED)
 ...
-target_link_libraries(your_executable rocksprofiler)
+target_link_libraries(your_executable rocksprofiler::rocksprofiler)
 ```
 
 ### deploy the grafana dashboard
