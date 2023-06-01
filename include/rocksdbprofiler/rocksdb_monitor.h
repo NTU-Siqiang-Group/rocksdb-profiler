@@ -27,9 +27,9 @@ class RocksDBCompactionMetric : public RocksDBEventMetric {
   double value_;
 };
 
-class RocksDBFlushBeginMetric : public RocksDBEventMetric {
+class RocksDBFlushMetric : public RocksDBEventMetric {
  public:
-  RocksDBFlushBeginMetric(double v): RocksDBEventMetric("flush_begin"), value_(v) {}
+  RocksDBFlushMetric(double v): RocksDBEventMetric("flush_end"), value_(v) {}
   virtual double GetValue() override {
     return value_;
   }
@@ -76,6 +76,14 @@ class StatsListener : public rocksdb::EventListener, public Source<std::shared_p
   void OnCompactionBegin(rocksdb::DB* db, const rocksdb::CompactionJobInfo& ci) override {
     std::lock_guard<std::mutex> lock(mtx_);
     metrics_.push(std::make_shared<RocksDBCompactionMetric>(1));
+  }
+  void OnFlushBegin(rocksdb::DB* db, const rocksdb::FlushJobInfo& fi) override {
+    std::lock_guard<std::mutex> lock(mtx_);
+    metrics_.push(std::make_shared<RocksDBFlushMetric>(1));
+  }
+  void OnFlushCompleted(rocksdb::DB* db, const rocksdb::FlushJobInfo& fi) override {
+    std::lock_guard<std::mutex> lock(mtx_);
+    metrics_.push(std::make_shared<RocksDBFlushMetric>(-1));
   }
   void ComputeImpl() override {
     std::lock_guard<std::mutex> lock(mtx_);
