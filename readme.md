@@ -22,14 +22,17 @@ find_package(rocksprofiler REQUIRED)
 target_link_libraries(your_executable rocksprofiler::rocksprofiler)
 ```
 
+There are some examples in the `examples` directory.
+
 ### deploy the grafana dashboard
 ```
-docker compose up
+docker compose up -d
 ```
 
 ### Take a look at the dashboard
 open your browser and go to `localhost:3000`, then login with `admin:admin`, you will see the dashboard.
 
+![examples](./examples/grafana-example.png)
 
 ## TODO
-- [ ] heavily impact the performance, need to optimize
+- [ ] unexpected segment fault at the end of the program 
