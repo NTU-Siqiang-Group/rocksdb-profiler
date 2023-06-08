@@ -52,7 +52,7 @@ open your browser and go to `localhost:3000`, then login with `admin:admin`, you
 
 ![examples](./examples/grafana-example.png)
 
-If you are not familiar grafana, please refer to [this document](grafana-guide.md), or simply take a look at the [official document](https://grafana.com/docs/grafana/latest/dashboards/manage-dashboards/#export-and-import-dashboards).
+If you are not familiar with grafana, please refer to [this document](grafana-guide.md), or simply take a look at the [official document](https://grafana.com/docs/grafana/latest/dashboards/manage-dashboards/#export-and-import-dashboards).
 
 Noted that the latency is logaritmic in order to make the latency and the IO consumption be at the similar scale. It would be very welcome if you have any idea to make it better (just open an issue or PR).
 
