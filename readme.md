@@ -5,7 +5,7 @@ This project aims to visualize the IO consumption and DB statistics so as to dem
 
 dependency:
 1. [prometheus-cpp](https://github.com/jupp0r/prometheus-cpp)
-2. docker
+2. [docker](https://docs.docker.com/engine/install/ubuntu/)
 
 ### install with cmake
 ```
@@ -54,5 +54,7 @@ open your browser and go to `localhost:3000`, then login with `admin:admin`, you
 
 If you are not familiar grafana, please refer to [this document](grafana-guide.md), or simply take a look at the [official document](https://grafana.com/docs/grafana/latest/dashboards/manage-dashboards/#export-and-import-dashboards).
 
+Noted that the latency is logaritmic in order to make the latency and the IO consumption be at the similar scale. It would be very welcome if you have any idea to make it better (just open an issue or PR).
+
 ## TODO
-- [ ] unexpected segment fault at the end of the program 
+- [x] unexpected segment fault at the end of the program 

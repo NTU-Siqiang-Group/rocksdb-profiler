@@ -21,12 +21,13 @@ class WorkFlowManager {
   }
   void Stop() {
     stop_.store(true);
-  }
-  ~WorkFlowManager() {
-    stop_.store(true);
     for (auto& w : workers) {
       w.join();
     }
+    workers.clear();
+  }
+  ~WorkFlowManager() {
+    Stop();
   }
  private:
   void startWorkflow(Computable* src) {
