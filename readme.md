@@ -56,5 +56,15 @@ If you are not familiar with grafana, please refer to [this document](grafana-gu
 
 Noted that the latency is logaritmic in order to make the latency and the IO consumption be at the similar scale. It would be very welcome if you have any idea to make it better (just open an issue or PR).
 
+### plot the result with python
+Not fond of grafana? No problem, you can plot the result with python. Just run the following command:
+```shell
+python3 get_result.py <seconds before now>
+```
+or
+```shell
+python3 get_result.py <start seconds before now> <end seconds before now>
+```
+
 ## TODO
 - [x] unexpected segment fault at the end of the program 
