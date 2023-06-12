@@ -19,6 +19,35 @@
 #include "rocksdb/listener.h"
 #include "rocksdb/table.h"
 
+class MonkeyFilterForLeveling {
+ public:
+  MonkeyFilterForLeveling(const int l, const int t, const uint64_t n,
+                          const uint64_t mf)
+      : L(l), T(t), N(n), Mf(mf) {}
+  std::vector<double> GetBitsPerKey() const {
+    std::vector<double> ret;
+    const double ln22 = std::log(2) * std::log(2);
+    double t1 = 0.0, t2 = 0.0;
+    for (int i = 1; i <= L; i++) {
+      t1 += std::log(ln22 * std::pow(T, L - i + 1)) / std::pow(T, L - i);
+      t2 += 1 / std::pow(T, L - i);
+    }
+    double M = (t1 - Mf * 8 * ln22 * T / N / (T - 1)) / t2;
+    double lmda = -exp(M) / N / (T - 1);
+    for (int i = 1; i <= L; i++) {
+      auto fpr = -lmda * N * (T - 1) / ln22 / std::pow(T, L - i + 1);
+      ret.push_back(log(1 / fpr) / ln22);
+    }
+    return ret;
+  }
+
+ private:
+  int L;
+  int T;
+  int N;
+  uint64_t Mf;
+};
+
 class BloomFilterAdaptor : public rocksdb::EventListener {
  public:
   // construct bloom filter for Bush
