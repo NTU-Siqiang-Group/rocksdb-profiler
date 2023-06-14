@@ -33,7 +33,9 @@ int main() {
   options.listeners.emplace_back(listener);
   options.statistics.reset(stats);
 
-  rocksdb::Status status = rocksdb::DB::Open(options, FLAGS_db_path, &db);
+  rocksdb::DB* db;
+  std::string db_path("/path/to/db");
+  rocksdb::Status status = rocksdb::DB::Open(options, db_path, &db);
   rocksdbprofiler::StartRocksDBProfiler();
   // launch your workload
   rocksdbprofiler::StopRocksDBProfiler();
